@@ -7,14 +7,17 @@
 
 class Cluster{
 private:
+
     double coord_x;
     double coord_y;
     int N_points; // number of points in the cluster
     double tot_coord_x;
     double tot_coord_y;
+
 public:
 
     Cluster(double coord_x,double coord_y){
+
         N_points = 0;
         this->coord_x = coord_x;
         this->coord_y = coord_y;
@@ -23,6 +26,7 @@ public:
     }
 
     Cluster(){
+
         N_points = 0;
         this->coord_x = 0;
         this->coord_y = 0;
@@ -30,18 +34,22 @@ public:
         tot_coord_y = 0;
     }
     double get_x(){
+
         return this->coord_x;
     }
 
     double get_y(){
+
         return this->coord_y;
     }
     void add_point(Point pt){
+
         N_points++; // increase the number of points of the cluster
         tot_coord_x += pt.get_x(); //update the value of total coordinate x
-        tot_coord_x += pt.get_y(); //update the value of total coordinate y
+        tot_coord_y += pt.get_y(); //update the value of total coordinate y
     }
     void delete_values(){
+
         this->N_points = 0;
         this->tot_coord_x = 0;
         this->tot_coord_y = 0;
@@ -51,12 +59,11 @@ public:
         if(this->coord_x == tot_coord_x/this->N_points && this->coord_y == tot_coord_y/this->N_points){
             return false;
         }
-        else{
-            this->coord_x = tot_coord_x/this->N_points;
-            this->coord_y = tot_coord_x/this->N_points;
-            return true;
-        }
 
+        this->coord_x = tot_coord_x/this->N_points;
+        this->coord_y = tot_coord_y/this->N_points;
+
+        return true;
     }
 
 };
