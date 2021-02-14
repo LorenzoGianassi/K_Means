@@ -97,7 +97,6 @@ double euclidean_dist(Point pt, Cluster cl){
     return dist;
 }
 
-// CAPIRE SE FARE METODO VOID OPPURE BOOL E MODIFICARE SEMMAI QUESTO METDODO E QUELLO NELLA CLASSE CLUSTER
 bool update_clusters(vector<Cluster>&cls) {
     bool  iterate = false;
     for (int i = 0; i < cls.size(); ++i) {
@@ -114,10 +113,9 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
 
     double min_dist;
     int min_index;
-    //modificare deafult a none e aggiungere shared(pts, cls)
 #pragma omp parallel default(none) private(min_dist, min_index) firstprivate(pts_size, cls_size) shared(pts,cls)
     {
-#pragma omp for schedule(static)
+#pragma omp for schedule(static,1000)
         for (int i = 0; i <pts_size ; ++i) {
             Point &point = pts[i];
             min_dist = euclidean_dist(point, cls[0]);
@@ -134,6 +132,7 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
             // set the cluster_id oof the point with minor distance
             pts[i].set_id(min_index);
             // add th point to the found cluster
+#pragma omp critical
             cls[min_index].add_point(pts[i]);
         }
     }
@@ -152,8 +151,6 @@ void plot(vector<Point> &points){
 
         Point point = points[i];
         Myfile << point.get_x() << " " << point.get_y() << " " << point.get_cluster_id() << endl;
-        Myfile.close();
-
     }
 
     Myfile.close();
