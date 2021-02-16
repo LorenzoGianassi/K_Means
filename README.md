@@ -18,7 +18,7 @@ To run the program simply run the Main class of the project.
 ### Sequential/Parallel Main <a name="4"/>
 To switch from sequential to parallel execution and vice versa, comment the line in the CMake file that corresponds to the unwanted Main between:
 ```
- add_executable(MidTerm_PC sequential_main.cpp Point.h Cluster.h)<br/>
+ add_executable(MidTerm_PC sequential_main.cpp Point.h Cluster.h)
  add_executable(MidTerm_PC parallel_main.cpp Point.h Cluster.h)
 ```
 ### Plot <a name="5"/>
