@@ -7,11 +7,11 @@
 #include "Cluster.h"
 using namespace std;
 
-int num_pt = 500000;
-int  num_cl = 20;
+int num_pt = 100000;
+int  num_cl = 10;
 int iterations = 20;
 double max_value = 100000;
-
+int num_threads = 0;
 vector<Point> create_point(int num_pt);
 vector<Cluster> create_cluster(int num_cl);
 void find_distance(vector<Point> &pts, vector<Cluster> &cls);
@@ -26,6 +26,7 @@ int main() {
     printf("Number of Clusters %d\n",num_cl);
 
     double start_time = omp_get_wtime();
+
     printf("Initialization \n");
 
     printf("Creation of the Points \n");
@@ -48,9 +49,23 @@ int main() {
     while(iteration_num < iterations && iterate){
 
         iteration_num ++;
+
+        double distance_start_time = omp_get_wtime();
         find_distance(pts,cls);
+        double distance_end_time = omp_get_wtime();
+        auto distance_duration = distance_end_time - distance_start_time;
+        //printf("Distance made in: %f seconds\n",distance_duration);
+
+
+        double cluster_start_time = omp_get_wtime();
         iterate = update_clusters(cls);
-        printf("Iterarion %d \n",iteration_num);
+        //printf("Iteration %d \n",iteration_num);
+        double cluster_end_time = omp_get_wtime();
+        auto cluster_duration = cluster_end_time - cluster_start_time;
+        //printf("Update made in: %f seconds\n",cluster_duration);
+
+
+
 
     }
     double end_time2 = omp_get_wtime();
@@ -97,15 +112,21 @@ double euclidean_dist(Point pt, Cluster cl){
     return dist;
 }
 
+
+// update the values of the clusters
 bool update_clusters(vector<Cluster>&cls) {
-    bool  iterate = false;
-    for (int i = 0; i < cls.size(); ++i) {
-        iterate = cls[i].update_values();
-        cls[i].delete_values();
+    bool iterate = false;
+#pragma omp parallel default(none) shared(cls,iterate)
+    {
+#pragma omp for schedule(static) lastprivate(iterate)
+        for (int i = 0; i < cls.size(); ++i) {
+            iterate = cls[i].update_values();
+            cls[i].delete_values();
+        }
     }
     return iterate;
-}
 
+}
 
 void find_distance(vector<Point>&pts,vector<Cluster>&cls){
     unsigned long pts_size = pts.size();
@@ -113,23 +134,25 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
 
     double min_dist;
     int min_index;
-#pragma omp parallel default(none) private(min_dist, min_index) firstprivate(pts_size, cls_size) shared(pts,cls)
+    int Thread_ID;
+#pragma omp parallel default(none) num_threads(4) private(min_dist, min_index,Thread_ID) firstprivate(pts_size, cls_size) shared(pts,cls)
     {
 #pragma omp for schedule(static,1000)
         for (int i = 0; i <pts_size ; ++i) {
-            Point &point = pts[i];
-            min_dist = euclidean_dist(point, cls[0]);
+            Point &current_point = pts[i];
+            // set the default min distance
+            min_dist = euclidean_dist(current_point,cls[0]);
             min_index = 0;
-            for (int j = 0; j < cls_size; ++j) {
-                Cluster &cluster = cls[j];
-                double dist = euclidean_dist(point, cluster);
+            for (int j = 0; j < cls_size; j++) {
+                Cluster &current_cluster = cls[j];
+                double dist = euclidean_dist(current_point, current_cluster);
                 // check the value of the distance if is inferior, update
-                if (dist < min_dist) {
+                if (dist<min_dist){
                     min_dist = dist;
                     min_index = j;
                 }
             }
-            // set the cluster_id oof the point with minor distance
+            // set the cluster_id of the point with minor distance
             pts[i].set_id(min_index);
             // add th point to the found cluster
 #pragma omp critical
@@ -140,7 +163,7 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
 }
 
 
-//Draw point plot with gnuplot
+//create files used to plot with an external python plot
 void plot(vector<Point> &points){
 
     ofstream Myfile("data.txt");
@@ -150,7 +173,7 @@ void plot(vector<Point> &points){
     for(int i = 0; i < points.size(); i++){
 
         Point point = points[i];
-        Myfile << point.get_x() << " " << point.get_y() << " " << point.get_cluster_id() << endl;
+        Myfile << point.get_x() << ", " << point.get_y() << ", " << point.get_cluster_id() << endl;
     }
 
     Myfile.close();

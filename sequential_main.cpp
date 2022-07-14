@@ -7,8 +7,8 @@
 #include "fstream"
 using namespace std;
 
-int num_pt = 500000;
-int  num_cl = 20;
+int num_pt = 1000000;
+int  num_cl = 1000;
 int iterations = 20;
 double max_value = 100000;
 
@@ -49,10 +49,20 @@ int main() {
     while(iteration_num < iterations && iterate){
 
         iteration_num ++;
-        find_distance(pts,cls);
-        iterate = update_clusters(cls);
-        printf("Iterarion %d \n",iteration_num);
 
+        double distance_start_time = omp_get_wtime();
+        find_distance(pts,cls);
+        double distance_end_time = omp_get_wtime();
+        auto distance_duration = distance_end_time - distance_start_time;
+        printf("Distance made in: %f seconds\n",distance_duration);
+
+
+        double cluster_start_time = omp_get_wtime();
+        iterate = update_clusters(cls);
+        printf("Iteration %d \n",iteration_num);
+        double cluster_end_time = omp_get_wtime();
+        auto cluster_duration = cluster_end_time - cluster_start_time;
+        printf("Update made in: %f seconds\n",cluster_duration);
     }
     double end_time2 = omp_get_wtime();
     duration = end_time2 - end_time1;
@@ -65,8 +75,6 @@ int main() {
 
     return 0;
 }
-
-
 
 
 
@@ -118,20 +126,20 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
         int min_index;
 
     for (int i = 0; i <pts_size ; i++) {
-        Point &point = pts[i];
-        min_dist = euclidean_dist(point,cls[0]);
+        Point &current_point = pts[i];
+        // set the default min distance
+        min_dist = euclidean_dist(current_point,cls[0]);
         min_index = 0;
         for (int j = 0; j < cls_size; j++) {
-            Cluster &cluster = cls[j];
-            double dist = euclidean_dist(point, cluster);
+            Cluster &current_cluster = cls[j];
+            double dist = euclidean_dist(current_point, current_cluster);
             // check the value of the distance if is inferior, update
             if (dist<min_dist){
                 min_dist = dist;
                 min_index = j;
             }
         }
-        // set the cluster_id oof the point with minor distance
-        //printf(" il min index: %d\n",min_index);
+        // set the cluster_id of the point with minor distance
         pts[i].set_id(min_index);
         // add the point to the found cluster
         cls[min_index].add_point(pts[i]);
@@ -141,7 +149,7 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
 
 
 
-//Draw point plot with gnuplot
+//Create files used to plot with an external python plot
 void plot(vector<Point> &points){
 
 
