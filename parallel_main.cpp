@@ -7,8 +7,8 @@
 #include "Cluster.h"
 using namespace std;
 
-int num_pt = 100000;
-int  num_cl = 10;
+int num_pt = 1000000;
+int  num_cl = 1000;
 int iterations = 20;
 double max_value = 100000;
 int num_threads = 0;
