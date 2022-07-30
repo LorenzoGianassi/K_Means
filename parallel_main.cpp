@@ -145,7 +145,7 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
             pts[i].set_id(min_index);
             // add th point to the found cluster
             // uncomment if you don't use the OMP Atomic command on the add_point method, to make Thread Safe
-#pragma omp critical
+//#pragma omp critical
             cls[min_index].add_point(pts[i]);
         }
     }

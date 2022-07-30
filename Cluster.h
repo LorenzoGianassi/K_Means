@@ -46,11 +46,11 @@ public:
 
     // Comment the #pragma lines if you don't want to apply the atomic construct at the add-point method ---> make critical inside find_distance
     void add_point(Point pt) {
-//#pragma omp atomic update
+#pragma omp atomic update
             N_points++;
-//#pragma atomic update
+#pragma atomic update
         tot_coord_x += pt.get_x();
-//#pragma omp atomic update
+#pragma omp atomic update
         tot_coord_y += pt.get_y();
   }
     void delete_values(){
