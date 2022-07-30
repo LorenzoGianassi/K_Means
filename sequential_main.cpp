@@ -7,8 +7,8 @@
 #include "fstream"
 using namespace std;
 
-int num_pt = 1000000;
-int  num_cl = 1000;
+int num_pt = 500000;
+int  num_cl = 10000;
 int iterations = 20;
 double max_value = 100000;
 
@@ -49,20 +49,14 @@ int main() {
     while(iteration_num < iterations && iterate){
 
         iteration_num ++;
-
-        double distance_start_time = omp_get_wtime();
         find_distance(pts,cls);
-        double distance_end_time = omp_get_wtime();
-        auto distance_duration = distance_end_time - distance_start_time;
-        printf("Distance made in: %f seconds\n",distance_duration);
-
-
         double cluster_start_time = omp_get_wtime();
+        // Updating of clusters centroids
         iterate = update_clusters(cls);
         printf("Iteration %d \n",iteration_num);
         double cluster_end_time = omp_get_wtime();
         auto cluster_duration = cluster_end_time - cluster_start_time;
-        printf("Update made in: %f seconds\n",cluster_duration);
+        printf("Clusters Update made in: %f seconds\n",cluster_duration);
     }
     double end_time2 = omp_get_wtime();
     duration = end_time2 - end_time1;

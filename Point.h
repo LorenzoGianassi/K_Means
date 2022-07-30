@@ -7,7 +7,7 @@ class Point{
 private:
     double coord_x; // identifies the x coordinate of the point
     double coord_y; // identifies the y coordinate of the point
-    int id_cluster; //identifies the id of the cluster of the point
+    int id_cluster; // identifies the id of the cluster of the point
 
 public:
 

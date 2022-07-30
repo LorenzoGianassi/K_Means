@@ -3,6 +3,7 @@
 #define MIDTERM_PC_CLUSTER_H
 
 #include "Point.h"
+#include <omp.h>
 #include <queue>
 
 class Cluster{
@@ -42,8 +43,10 @@ public:
 
         return this->coord_y;
     }
-    void add_point(Point pt){
 
+    // Comment the #pragma line if you don't want to apply the reduction the add-point method ---> make critical inside find_distance
+    void add_point(Point pt){
+#pragma omp parallel default(none) reduction(+ : tot_coord_x, tot_coord_y, N_points)
         N_points++; // increase the number of points of the cluster
         tot_coord_x += pt.get_x(); //update the value of total coordinate x
         tot_coord_y += pt.get_y(); //update the value of total coordinate y
@@ -59,7 +62,6 @@ public:
         if(this->coord_x == tot_coord_x/this->N_points && this->coord_y == tot_coord_y/this->N_points){
             return false;
         }
-
         this->coord_x = tot_coord_x/this->N_points;
         this->coord_y = tot_coord_y/this->N_points;
 

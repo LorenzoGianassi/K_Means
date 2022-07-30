@@ -7,8 +7,8 @@
 #include "Cluster.h"
 using namespace std;
 
-int num_pt = 1000000;
-int  num_cl = 1000;
+int num_pt = 500000;
+int  num_cl = 10000;
 int iterations = 20;
 double max_value = 100000;
 int num_threads = 0;
@@ -49,23 +49,14 @@ int main() {
     while(iteration_num < iterations && iterate){
 
         iteration_num ++;
-
-        double distance_start_time = omp_get_wtime();
         find_distance(pts,cls);
-        double distance_end_time = omp_get_wtime();
-        auto distance_duration = distance_end_time - distance_start_time;
-        //printf("Distance made in: %f seconds\n",distance_duration);
-
-
+        // Updating of clusters centroids
         double cluster_start_time = omp_get_wtime();
         iterate = update_clusters(cls);
-        //printf("Iteration %d \n",iteration_num);
+        printf("Iteration %d \n",iteration_num);
         double cluster_end_time = omp_get_wtime();
         auto cluster_duration = cluster_end_time - cluster_start_time;
-        //printf("Update made in: %f seconds\n",cluster_duration);
-
-
-
+        printf("Clusters Update made in: %f seconds\n",cluster_duration);
 
     }
     double end_time2 = omp_get_wtime();
@@ -116,9 +107,7 @@ double euclidean_dist(Point pt, Cluster cl){
 // update the values of the clusters
 bool update_clusters(vector<Cluster>&cls) {
     bool iterate = false;
-#pragma omp parallel default(none) shared(cls,iterate)
     {
-#pragma omp for schedule(static) lastprivate(iterate)
         for (int i = 0; i < cls.size(); ++i) {
             iterate = cls[i].update_values();
             cls[i].delete_values();
@@ -155,7 +144,8 @@ void find_distance(vector<Point>&pts,vector<Cluster>&cls){
             // set the cluster_id of the point with minor distance
             pts[i].set_id(min_index);
             // add th point to the found cluster
-#pragma omp critical
+            // uncomment if you don't use the OMP Reduction command on the add_point method, to make Thread Safe
+//#pragma omp critical
             cls[min_index].add_point(pts[i]);
         }
     }
