@@ -24,7 +24,6 @@ public:
     }
 
     // getter and setter methods of the class point
-
     double get_x(){
         return this->coord_x;
     }

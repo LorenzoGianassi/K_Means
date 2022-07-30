@@ -44,13 +44,15 @@ public:
         return this->coord_y;
     }
 
-    // Comment the #pragma line if you don't want to apply the reduction the add-point method ---> make critical inside find_distance
-    void add_point(Point pt){
-#pragma omp parallel default(none) reduction(+ : tot_coord_x, tot_coord_y, N_points)
-        N_points++; // increase the number of points of the cluster
-        tot_coord_x += pt.get_x(); //update the value of total coordinate x
-        tot_coord_y += pt.get_y(); //update the value of total coordinate y
-    }
+    // Comment the #pragma lines if you don't want to apply the atomic construct at the add-point method ---> make critical inside find_distance
+    void add_point(Point pt) {
+//#pragma omp atomic update
+            N_points++;
+//#pragma atomic update
+        tot_coord_x += pt.get_x();
+//#pragma omp atomic update
+        tot_coord_y += pt.get_y();
+  }
     void delete_values(){
 
         this->N_points = 0;
